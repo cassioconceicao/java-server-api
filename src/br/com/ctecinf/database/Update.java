@@ -93,7 +93,7 @@ public class Update implements AutoCloseable {
     }
 
     /**
-     * <i>PreparedStatement</i> padrão para alterar dados na tabela
+     * Cria SQL padrão para alterar dados na tabela
      *
      * @throws DatabaseException
      */
@@ -130,7 +130,7 @@ public class Update implements AutoCloseable {
     }
 
     /**
-     * <i>PreparedStatement</i> padrão para apagar registro na tabela
+     * Cria SQL padrão para apagar registro na tabela
      *
      * @throws DatabaseException
      */
