@@ -1,0 +1,208 @@
+{
+  "cfop":{
+    "to_string":"CFOP registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "descricao":"DESCRICAO"
+    }
+  },
+  "cliente":{
+    "to_string":"CLIENTE registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "nome":"NOME",
+      "sexo":"SEXO",
+      "estado_civil":"ESTADO CIVIL",
+      "data_cadastro":"DATA CADASTRO",
+      "data_nascimento":"DATA NASCIMENTO",
+      "rg":"RG",
+      "cpf":"CPF",
+      "naturalidade":"NATURALIDADE",
+      "salario":"SALARIO",
+      "carteira_trabalho":"CARTEIRA TRABALHO",
+      "endereco_empresa":"ENDERECO EMPRESA",
+      "empresa":"EMPRESA",
+      "nome_pai":"NOME PAI",
+      "nome_mae":"NOME MAE",
+      "endereco":"ENDERECO",
+      "bairro":"BAIRRO",
+      "cep":"CEP",
+      "municipio":"MUNICIPIO",
+      "fone":"FONE",
+      "celular":"CELULAR",
+      "email":"EMAIL",
+      "conjuge":"CONJUGE",
+      "data_nascimento_conjuge":"DATA NASCIMENTO CONJUGE",
+      "rg_conjuge":"RG CONJUGE",
+      "fone_conjuge":"FONE CONJUGE",
+      "celular_conjuge":"CELULAR CONJUGE",
+      "conhecido":"CONHECIDO",
+      "fone_conhecido":"FONE CONHECIDO",
+      "spc":"SPC",
+      "observacao":"OBSERVACAO"
+    }
+  },
+  "fornecedor":{
+    "to_string":"FORNECEDOR registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "cnpj":"CNPJ",
+      "razao_social":"RAZAO SOCIAL",
+      "fone_1":"FONE 1",
+      "fone_2":"FONE 2",
+      "email":"EMAIL",
+      "cep":"CEP",
+      "endereco":"ENDERECO",
+      "complemento":"COMPLEMENTO",
+      "bairro":"BAIRRO",
+      "uf":"UF",
+      "municipio_id":"MUNICIPIO ID"
+    }
+  },
+  "grupo":{
+    "to_string":"GRUPO registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "descricao":"DESCRICAO"
+    }
+  },
+  "icms":{
+    "to_string":"ICMS registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "descricao":"DESCRICAO"
+    }
+  },
+  "icms_origem":{
+    "to_string":"ICMS_ORIGEM registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "descricao":"DESCRICAO"
+    }
+  },
+  "municipio":{
+    "to_string":"MUNICIPIO registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "cod_ibge":"COD IBGE",
+      "nome":"NOME",
+      "uf_cod_ibge":"UF COD IBGE",
+      "uf_nome":"UF NOME",
+      "uf_sigla":"UF SIGLA"
+    }
+  },
+  "ncm":{
+    "to_string":"NCM registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "descricao":"DESCRICAO"
+    }
+  },
+  "nfe":{
+    "to_string":"NFE registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "versao":"VERSAO",
+      "serie":"SERIE",
+      "tp_amb":"TP AMB",
+      "data_emissao":"DATA EMISSAO",
+      "nnf":"NNF",
+      "xml_path":"XML PATH",
+      "xml":"XML",
+      "numero_autorizacao":"NUMERO AUTORIZACAO",
+      "chave_acesso":"CHAVE ACESSO",
+      "cliente":"CLIENTE",
+      "cancelada":"CANCELADA",
+      "qr_code":"QR CODE"
+    }
+  },
+  "nfe_evento":{
+    "to_string":"NFE_EVENTO registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "versao":"VERSAO",
+      "tp_amb":"TP AMB",
+      "data_evento":"DATA EVENTO",
+      "id_lote":"ID LOTE",
+      "xml_path":"XML PATH",
+      "chave_acesso_nfe":"CHAVE ACESSO NFE",
+      "xml":"XML",
+      "numero_protocolo":"NUMERO PROTOCOLO",
+      "nfe_id":"NFE ID"
+    }
+  },
+  "nfe_pagamento":{
+    "to_string":"NFE_PAGAMENTO registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "descricao":"DESCRICAO",
+      "valor":"VALOR",
+      "nfe_id":"NFE ID"
+    }
+  },
+  "nfe_produto":{
+    "to_string":"NFE_PRODUTO registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "produto_id":"PRODUTO ID",
+      "ncm_id":"NCM ID",
+      "und_com":"UND COM",
+      "qtd_com":"QTD COM",
+      "valor_unit":"VALOR UNIT",
+      "nfe_id":"NFE ID"
+    }
+  },
+  "nfe_rejeitada":{
+    "to_string":"NFE_REJEITADA registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "versao":"VERSAO",
+      "serie":"SERIE",
+      "tp_amb":"TP AMB",
+      "data_emissao":"DATA EMISSAO",
+      "nnf":"NNF",
+      "xml":"XML",
+      "chave_acesso":"CHAVE ACESSO",
+      "motivo":"MOTIVO",
+      "cliente":"CLIENTE",
+      "qr_code":"QR CODE"
+    }
+  },
+  "produto":{
+    "to_string":"PRODUTO registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "descricao":"DESCRICAO",
+      "ean":"EAN",
+      "ean_trib":"EAN TRIB",
+      "valor_unitario":"VALOR UNITARIO",
+      "aliquota":"ALIQUOTA",
+      "und_com":"UND COM",
+      "cfop_id":"CFOP ID",
+      "ncm_id":"NCM ID",
+      "icms_id":"ICMS ID",
+      "icms_origem_id":"ICMS ORIGEM ID",
+      "fornecedor_id":"FORNECEDOR ID",
+      "grupo_id":"GRUPO ID",
+      "sub_grupo_id":"SUB GRUPO ID",
+      "ultima_atualizacao":"ULTIMA ATUALIZACAO",
+      "diametro":"DIAMETRO",
+      "altura":"ALTURA",
+      "base":"BASE",
+      "adicao":"ADICAO",
+      "disponibilidade":"DISPONIBILIDADE",
+      "tamanho":"TAMANHO",
+      "cor":"COR",
+      "quantidade":"QUANTIDADE",
+      "premio":"PREMIO"
+    }
+  },
+  "sub_grupo":{
+    "to_string":"SUB_GRUPO registro ID: {id}",
+    "labels":{
+      "id":"ID",
+      "descricao":"DESCRICAO",
+      "valor":"VALOR"
+    }
+  }
+}

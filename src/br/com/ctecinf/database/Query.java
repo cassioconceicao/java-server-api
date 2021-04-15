@@ -191,6 +191,12 @@ public class Query implements AutoCloseable {
         }
     }
 
+    /**
+     * Retorna o resultado da consulta em JSONArray
+     *
+     * @return JSONArray
+     * @throws DatabaseException
+     */
     public JSONArray getJSON() throws DatabaseException {
 
         try (ResultSet rs = this.getResultSet()) {
