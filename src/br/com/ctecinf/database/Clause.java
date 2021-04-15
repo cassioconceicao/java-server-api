@@ -14,13 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package br.com.ctecinf.orm;
+package br.com.ctecinf.database;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -35,17 +34,6 @@ public class Clause {
 
     public Clause(String table) {
         this.table = table;
-    }
-
-    private static String implode(String glue, List arr) {
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for (int i = 0; i < arr.size(); i++) {
-            stringBuilder.append(arr.size() == (i + 1) ? arr.get(i) : arr.get(i) + glue);
-        }
-
-        return stringBuilder.toString();
     }
 
     public void equal(String column, Object value) {
@@ -85,34 +73,29 @@ public class Clause {
     }
 
     public void in(String column, Object... values) {
-        clause = table + "." + column + " IN (" + (values == null ? " NULL " : Clause.implode(", ", Arrays.asList(values))) + ")";
+        clause = table + "." + column + " IN (" + (values == null ? " NULL " : Arrays.stream(values).map(String::valueOf).collect(Collectors.joining(", "))) + ")";
     }
 
     public void notIn(String column, Object... values) {
-        clause = table + "." + column + " NOT IN (" + (values == null ? " NULL " : Clause.implode(", ", Arrays.asList(values))) + ")";
+        clause = table + "." + column + " NOT IN (" + (values == null ? " NULL " : Arrays.stream(values).map(String::valueOf).collect(Collectors.joining(", "))) + ")";
     }
 
-    public void like(Object filter) throws ORMException {
+    public void like(Object filter) throws DatabaseException {
 
         List<String> columns = new ArrayList();
 
-        for (String column : getColumns(table).keySet()) {
+        for (String column : Metadata.getColumnsName(table)) {
 
             columns.add("LOWER (" + table + "." + column + ") LIKE '" + (filter == null ? "" : filter.toString().toLowerCase()) + "%'");
 
-            LinkedHashMap<String, String> references = getColumnsForeignKey(table);
-
-            for (Map.Entry<String, String> entry : references.entrySet()) {
-
-                String referenceTable = entry.getValue();
-
-                for (String col : getColumns(referenceTable).keySet()) {
-                    columns.add("LOWER (" + referenceTable + "." + col + ") LIKE '" + (filter == null ? "" : filter.toString().toLowerCase()) + "%'");
-                }
+            for (Object referencedTable : Metadata.getReferencedTables(table).values()) {
+                Metadata.getColumnsName(referencedTable.toString()).stream().forEach((col) -> {
+                    columns.add("LOWER (" + referencedTable + "." + col + ") LIKE '" + (filter == null ? "" : filter.toString().toLowerCase()) + "%'");
+                });
             }
         }
 
-        clause = "(" + Clause.implode(" OR ", columns) + ")";
+        clause = "(" + columns.stream().map(String::valueOf).collect(Collectors.joining(" OR ")) + ")";
     }
 
     public static Clause equal(String table, String column, Object value) {
@@ -203,7 +186,7 @@ public class Clause {
         return c;
     }
 
-    public static Clause like(String table, Object filter) throws ORMException {
+    public static Clause like(String table, Object filter) throws DatabaseException {
 
         Clause c = new Clause(table);
         c.like(filter);
@@ -310,7 +293,7 @@ public class Clause {
         return c;
     }
 
-    public static Clause orLike(String table, Object filter) throws ORMException {
+    public static Clause orLike(String table, Object filter) throws DatabaseException {
 
         Clause c = new Clause(table);
         c.like(filter);
@@ -418,7 +401,7 @@ public class Clause {
         return c;
     }
 
-    public static Clause andLike(String table, Object filter) throws ORMException {
+    public static Clause andLike(String table, Object filter) throws DatabaseException {
 
         Clause c = new Clause(table);
         c.like(filter);
