@@ -309,6 +309,21 @@ public class DataType {
      * @throws DatabaseException
      */
     public static Object getValue(ResultSet rs, String column) throws DatabaseException {
+        return getValue(rs, column, Object.class);
+    }
+
+    /**
+     * Pega o valor da coluna no <i>ResultSet</i> conforme o tipo de dado da
+     * coluna
+     *
+     * @param <T> Retorna o objeto no tipo específico do valor
+     * @param rs
+     * @param column
+     * @param t Tipo do retorno
+     * @return Object
+     * @throws DatabaseException
+     */
+    public static <T> T getValue(ResultSet rs, String column, Class<T> t) throws DatabaseException {
 
         try {
 
@@ -380,7 +395,7 @@ public class DataType {
                 }
             }
 
-            return value;
+            return (T) value;
 
         } catch (SQLException ex) {
             throw new DatabaseException(ex);

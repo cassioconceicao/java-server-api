@@ -207,20 +207,17 @@ public class Query implements AutoCloseable {
 
             while (rs.next()) {
 
-                JSONObject data = new JSONObject();
+                JSONObject data = getData(table, rs);
 
                 String toString = ORM.toString(table);
                 String idValue = "";
 
-                for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+                for (String key : data.keySet()) {
 
-                    String key = rs.getMetaData().getColumnLabel(i + 1).trim();
-                    Object value = DataType.getValue(rs, key);
+                    String value = data.getStringValue(key);
 
-                    data.put(key.replace(table + "_", ""), value);
-
-                    if (value != null) {
-                        toString = toString.replace("{" + key.replace(table + "_", "") + "}", value.toString());
+                    if (value != null && !value.isEmpty()) {
+                        toString = toString.replace("{" + key + "}", value);
                     }
 
                     if (data.containsKey(idKey)) {
@@ -241,6 +238,39 @@ public class Query implements AutoCloseable {
         } catch (SQLException ex) {
             throw new DatabaseException(ex);
         }
+    }
+
+    /**
+     * Extraí dados da linha do ResultSet
+     *
+     * @param table
+     * @param rs
+     * @return JSONObject
+     * @throws DatabaseException
+     */
+    private JSONObject getData(String table, ResultSet rs) throws DatabaseException {
+
+        List<String> columns = Metadata.getColumnsName(table);
+        JSONObject reference = Metadata.getReferencedTables(table);
+
+        JSONObject data = new JSONObject();
+
+        for (String column : columns) {
+
+            data.put(column, DataType.getValue(rs, table + "_" + column));
+
+            if (reference.containsKey(column)) {
+                try {
+                    int index = rs.findColumn(table + "_" + column);
+                    if (index > -1) {
+                        data.put(reference.getStringValue(column), getData(reference.getStringValue(column), rs));
+                    }
+                } catch (SQLException ex) {
+                }
+            }
+        }
+
+        return data;
     }
 
     @Override
