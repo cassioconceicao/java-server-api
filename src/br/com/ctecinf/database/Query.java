@@ -194,7 +194,8 @@ public class Query implements AutoCloseable {
     /**
      * Retorna o resultado da consulta em JSONArray
      *
-     * @return JSONArray
+     * @return JSONArray [ { "label": "<i>to_string</i>",
+     * "value":"<i>primary_key</i>", "data": { "column": "value", ...} }, ... ]
      * @throws DatabaseException
      */
     public JSONArray getJSON() throws DatabaseException {
@@ -202,15 +203,35 @@ public class Query implements AutoCloseable {
         try (ResultSet rs = this.getResultSet()) {
 
             JSONArray array = new JSONArray();
+            String idKey = Metadata.getPrimaryKeyName(table);
 
             while (rs.next()) {
 
-                JSONObject row = new JSONObject();
+                JSONObject data = new JSONObject();
+
+                String toString = ORM.toString(table);
+                String idValue = "";
 
                 for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+
                     String key = rs.getMetaData().getColumnLabel(i + 1).trim();
-                    row.put(key, DataType.getValue(rs, key));
+                    Object value = DataType.getValue(rs, key);
+
+                    data.put(key.replace(table + "_", ""), value);
+
+                    if (value != null) {
+                        toString = toString.replace("{" + key.replace(table + "_", "") + "}", value.toString());
+                    }
+
+                    if (data.containsKey(idKey)) {
+                        idValue = data.getStringValue(idKey);
+                    }
                 }
+
+                JSONObject row = new JSONObject();
+                row.put("label", toString);
+                row.put("value", idValue);
+                row.put("data", data);
 
                 array.add(row);
             }

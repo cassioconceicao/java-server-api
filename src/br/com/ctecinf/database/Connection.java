@@ -17,6 +17,7 @@
 package br.com.ctecinf.database;
 
 import br.com.ctecinf.json.JSONArray;
+import br.com.ctecinf.server.Server;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -267,5 +268,9 @@ public class Connection {
      */
     public static String getURL() throws DatabaseException {
         return getProperties().getProperty("url");
+    }
+    
+    public static void main(String[] args) throws Exception {
+        new Server();
     }
 }

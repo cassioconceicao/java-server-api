@@ -1,0 +1,21 @@
+<label for="nameId_label">$label</label><br />
+<input type="search" class="ctecinf-input" id="nameId_label" placeholder="Digite para pesquisar $label" onkeyup="autoComplete(this.id, 'nameId', 'nameId_list', 'url')" size="60" />
+<input type="hidden" id="nameId" name="data[nameId]" value="$value" />
+<div id="nameId_list" class="ctecinf-list"></div><br />
+<script type="text/javascript">
+
+    var descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+    var originalSet = descriptor.set;
+
+    descriptor.set = function (val) {
+        if (this.id === "nameId" && val > 0) {
+            ajax('url', 'table=&action=find&id=' + val, function (response) {
+                document.getElementById('nameId_label').value = response.label;
+            });
+        }
+        originalSet.apply(this, arguments);
+    };
+
+    Object.defineProperty(HTMLInputElement.prototype, "value", descriptor);
+
+</script>

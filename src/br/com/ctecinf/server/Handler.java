@@ -162,7 +162,7 @@ public abstract class Handler implements HttpHandler {
 
                     try {
                         Number num = number.parse(value.toString());
-                        value = num.intValue() == 0 ? null : num;
+                        value = num;
                     } catch (ParseException ex) {
                     }
 
