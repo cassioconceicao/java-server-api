@@ -32,386 +32,831 @@ public class Clause {
     private final String table;
     private String clause;
 
+    /**
+     * Construtor
+     *
+     * @param table Nome da tabela
+     */
     public Clause(String table) {
         this.table = table;
+        this.clause = "";
     }
 
-    public void equal(String column, Object value) {
-        clause = table + "." + column + " = " + (value == null ? " NULL " : "'" + value + "'");
+    /**
+     * Cria claúsula
+     *
+     * @param table
+     * @return Clause
+     */
+    public static Clause create(String table) {
+        return new Clause(table);
     }
 
-    public void notEqual(String column, Object value) {
-        clause = table + "." + column + " <> " + (value == null ? " NULL " : "'" + value + "'");
+    /**
+     * Abre parenteses
+     *
+     * @return Clause
+     */
+    public Clause openParentheses() {
+        this.clause += "(";
+        return this;
     }
 
-    public void less(String column, Object value) {
-        clause = table + "." + column + " < " + (value == null ? " NULL " : "'" + value + "'");
+    /**
+     * Fecha parenteses
+     *
+     * @return Clause
+     */
+    public Clause closeParentheses() {
+        this.clause += ")";
+        return this;
     }
 
-    public void greater(String column, Object value) {
-        clause = table + "." + column + " > " + (value == null ? " NULL " : "'" + value + "'");
+    /**
+     * Igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause equal(String column, Object value) {
+        this.clause = this.table + "." + column + " = " + (value == null ? " NULL " : "'" + value + "'");
+        return this;
     }
 
-    public void lessEqual(String column, Object value) {
-        clause = table + "." + column + " <= " + (value == null ? " NULL " : "'" + value + "'");
+    /**
+     * Não igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause notEqual(String column, Object value) {
+        this.clause = this.table + "." + column + " <> " + (value == null ? " NULL " : "'" + value + "'");
+        return this;
     }
 
-    public void greaterEqual(String column, Object value) {
-        clause = table + "." + column + " >= " + (value == null ? " NULL " : "'" + value + "'");
+    /**
+     * Menor
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause less(String column, Object value) {
+        this.clause = this.table + "." + column + " < " + (value == null ? " NULL " : "'" + value + "'");
+        return this;
     }
 
-    public void isNull(String column) {
-        clause = table + "." + column + " IS NULL";
+    /**
+     * Maior
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause greater(String column, Object value) {
+        this.clause = this.table + "." + column + " > " + (value == null ? " NULL " : "'" + value + "'");
+        return this;
     }
 
-    public void isNotNull(String column) {
-        clause = table + "." + column + " IS NOT NULL";
+    /**
+     * Menor igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause lessEqual(String column, Object value) {
+        this.clause = this.table + "." + column + " <= " + (value == null ? " NULL " : "'" + value + "'");
+        return this;
     }
 
-    public void between(String column, Object value1, Object value2) {
-        clause = table + "." + column + " BETWEEN " + (value1 == null ? " NULL " : "'" + value1 + "'") + " AND " + (value2 == null ? " NULL " : "'" + value2 + "'");
+    /**
+     * Maior igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause greaterEqual(String column, Object value) {
+        this.clause = this.table + "." + column + " >= " + (value == null ? " NULL " : "'" + value + "'");
+        return this;
     }
 
-    public void in(String column, Object... values) {
-        clause = table + "." + column + " IN (" + (values == null ? " NULL " : Arrays.stream(values).map(String::valueOf).collect(Collectors.joining(", "))) + ")";
+    /**
+     * Nulo
+     *
+     * @param column
+     * @return Clause
+     */
+    public Clause isNull(String column) {
+        this.clause = this.table + "." + column + " IS NULL";
+        return this;
     }
 
-    public void notIn(String column, Object... values) {
-        clause = table + "." + column + " NOT IN (" + (values == null ? " NULL " : Arrays.stream(values).map(String::valueOf).collect(Collectors.joining(", "))) + ")";
+    /**
+     * Não nulo
+     *
+     * @param column
+     * @return Clause
+     */
+    public Clause isNotNull(String column) {
+        this.clause = this.table + "." + column + " IS NOT NULL";
+        return this;
     }
 
-    public void like(Object filter) throws DatabaseException {
+    /**
+     * Entre
+     *
+     * @param column
+     * @param value1
+     * @param value2
+     * @return Clause
+     */
+    public Clause between(String column, Object value1, Object value2) {
+        this.clause = this.table + "." + column + " BETWEEN " + (value1 == null ? " NULL " : "'" + value1 + "'") + " AND " + (value2 == null ? " NULL " : "'" + value2 + "'");
+        return this;
+    }
+
+    /**
+     * Dentro
+     *
+     * @param column
+     * @param values
+     * @return Clause
+     */
+    public Clause in(String column, Object... values) {
+        this.clause = this.table + "." + column + " IN (" + (values == null ? " NULL " : Arrays.stream(values).map(String::valueOf).collect(Collectors.joining(", "))) + ")";
+        return this;
+    }
+
+    /**
+     * Fora
+     *
+     * @param column
+     * @param values
+     * @return Clause
+     */
+    public Clause notIn(String column, Object... values) {
+        this.clause = this.table + "." + column + " NOT IN (" + (values == null ? " NULL " : Arrays.stream(values).map(String::valueOf).collect(Collectors.joining(", "))) + ")";
+        return this;
+    }
+
+    /**
+     * Filtro
+     *
+     * @param filter
+     * @return Clause
+     * @throws DatabaseException
+     */
+    public Clause like(Object filter) throws DatabaseException {
+
+        if (filter == null) {
+            return this;
+        }
 
         List<String> columns = new ArrayList();
 
-        for (String column : Metadata.getColumnsName(table)) {
-
-            columns.add("LOWER (" + table + "." + column + ") LIKE '" + (filter == null ? "" : filter.toString().toLowerCase()) + "%'");
-
-            for (Object referencedTable : Metadata.getReferencedTables(table).values()) {
-                Metadata.getColumnsName(referencedTable.toString()).stream().forEach((col) -> {
-                    columns.add("LOWER (" + referencedTable + "." + col + ") LIKE '" + (filter == null ? "" : filter.toString().toLowerCase()) + "%'");
-                });
+        for (String column : Metadata.getColumnsName(this.table)) {
+            if (Connection.getURL().contains("postgres")) {
+                columns.add("LOWER (CAST(" + this.table + "." + column + ") AS VARCHAR) LIKE '" + filter.toString().toLowerCase() + "%'");
+            } else {
+                columns.add("LOWER (" + this.table + "." + column + ") LIKE '" + filter.toString().toLowerCase() + "%'");
             }
         }
 
-        clause = "(" + columns.stream().map(String::valueOf).collect(Collectors.joining(" OR ")) + ")";
+        for (Object referencedTable : Metadata.getReferencedTables(this.table).values()) {
+            for (String col : Metadata.getColumnsName(referencedTable.toString())) {
+                if (Connection.getURL().contains("postgres")) {
+                    columns.add("LOWER (CAST(" + referencedTable + "." + col + ") AS VARCHAR) LIKE '" + filter.toString().toLowerCase() + "%'");
+                } else {
+                    columns.add("LOWER (" + referencedTable + "." + col + ") LIKE '" + filter.toString().toLowerCase() + "%'");
+                }
+            }
+        }
+
+        this.openParentheses();
+        this.clause += columns.stream().map(String::valueOf).collect(Collectors.joining(" OR "));
+        this.closeParentheses();
+
+        return this;
     }
 
-    public static Clause equal(String table, String column, Object value) {
+    /**
+     * Igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orEqual(String column, Object value) {
+        return this.orEqual(this.table, column, value);
+    }
+
+    /**
+     * Igual
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orEqual(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.equal(column, value);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause notEqual(String table, String column, Object value) {
+    /**
+     * Não igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orNotEqual(String column, Object value) {
+        return this.orNotEqual(this.table, column, value);
+    }
+
+    /**
+     * Não igual
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orNotEqual(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.notEqual(column, value);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause less(String table, String column, Object value) {
+    /**
+     * Menor
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orLess(String column, Object value) {
+        return this.orLess(this.table, column, value);
+    }
+
+    /**
+     * Menor
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orLess(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.less(column, value);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause greater(String table, String column, Object value) {
+    /**
+     * Maior
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orGreater(String column, Object value) {
+        return this.orGreater(this.table, column, value);
+    }
+
+    /**
+     * Maior
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orGreater(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.greater(column, value);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause lessEqual(String table, String column, Object value) {
+    /**
+     * Menor igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orLessEqual(String column, Object value) {
+        return this.orLessEqual(this.table, column, value);
+    }
+
+    /**
+     * Menor igual
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orLessEqual(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.lessEqual(column, value);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause greaterEqual(String table, String column, Object value) {
+    /**
+     * Maior igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orGreaterEqual(String column, Object value) {
+        return this.orGreaterEqual(this.table, column, value);
+    }
+
+    /**
+     * Maior igual
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause orGreaterEqual(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.greaterEqual(column, value);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause isNull(String table, String column) {
+    /**
+     * Nulo
+     *
+     * @param column
+     * @return Clause
+     */
+    public Clause orIsNull(String column) {
+        return this.orIsNotNull(this.table, column);
+    }
+
+    /**
+     * Nulo
+     *
+     * @param table
+     * @param column
+     * @return Clause
+     */
+    public Clause orIsNull(String table, String column) {
 
         Clause c = new Clause(table);
         c.isNull(column);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause isNotNull(String table, String column) {
+    /**
+     * Não nulo
+     *
+     * @param column
+     * @return Clause
+     */
+    public Clause orIsNotNull(String column) {
+        return this.orIsNotNull(this.table, column);
+    }
+
+    /**
+     * Não nulo
+     *
+     * @param table
+     * @param column
+     * @return Clause
+     */
+    public Clause orIsNotNull(String table, String column) {
 
         Clause c = new Clause(table);
         c.isNotNull(column);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause between(String table, String column, Object value1, Object value2) {
+    /**
+     * Entre
+     *
+     * @param column
+     * @param value1
+     * @param value2
+     * @return Clause
+     */
+    public Clause orBetween(String column, Object value1, Object value2) {
+        return this.orBetween(this.table, column, value1, value2);
+    }
+
+    /**
+     * Entre
+     *
+     * @param table
+     * @param column
+     * @param value1
+     * @param value2
+     * @return Clause
+     */
+    public Clause orBetween(String table, String column, Object value1, Object value2) {
 
         Clause c = new Clause(table);
         c.between(column, value1, value2);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause in(String table, String column, Object... values) {
+    /**
+     * Dentro
+     *
+     * @param column
+     * @param values
+     * @return Clause
+     */
+    public Clause orIn(String column, Object... values) {
+        return this.orIn(this.table, column, values);
+    }
+
+    /**
+     * Dentro
+     *
+     * @param table
+     * @param column
+     * @param values
+     * @return Clause
+     */
+    public Clause orIn(String table, String column, Object... values) {
 
         Clause c = new Clause(table);
         c.in(column, values);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause notIn(String table, String column, Object... values) {
+    /**
+     * Fora
+     *
+     * @param column
+     * @param values
+     * @return Clause
+     */
+    public Clause orNotIn(String column, Object... values) {
+        return this.orNotIn(this.table, column, values);
+    }
+
+    /**
+     * Fora
+     *
+     * @param table
+     * @param column
+     * @param values
+     * @return Clause
+     */
+    public Clause orNotIn(String table, String column, Object... values) {
 
         Clause c = new Clause(table);
         c.notIn(column, values);
+        this.clause += " OR " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause like(String table, Object filter) throws DatabaseException {
-
-        Clause c = new Clause(table);
-        c.like(filter);
-
-        return c;
+    /**
+     * Igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andEqual(String column, Object value) {
+        return this.andEqual(this.table, column, value);
     }
 
-    public static Clause orEqual(String table, String column, Object value) {
+    /**
+     * Igual
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andEqual(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.equal(column, value);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause orNotEqual(String table, String column, Object value) {
+    /**
+     * Não igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andNotEqual(String column, Object value) {
+        return this.andNotEqual(this.table, column, value);
+    }
+
+    /**
+     * Não igual
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andNotEqual(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.notEqual(column, value);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause orLess(String table, String column, Object value) {
+    /**
+     * Menor
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andLess(String column, Object value) {
+        return this.andLess(this.table, column, value);
+    }
+
+    /**
+     * Menor
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andLess(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.less(column, value);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause orGreater(String table, String column, Object value) {
+    /**
+     * Maior
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andGreater(String column, Object value) {
+        return this.andGreater(this.table, column, value);
+    }
+
+    /**
+     * Maior
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andGreater(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.greater(column, value);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause orLessEqual(String table, String column, Object value) {
+    /**
+     * Menor igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andLessEqual(String column, Object value) {
+        return this.andLessEqual(this.table, column, value);
+    }
+
+    /**
+     * Menor igual
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andLessEqual(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.lessEqual(column, value);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause orGreaterEqual(String table, String column, Object value) {
+    /**
+     * Maior igual
+     *
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andGreaterEqual(String column, Object value) {
+        return this.andGreaterEqual(this.table, column, value);
+    }
+
+    /**
+     * Maior igual
+     *
+     * @param table
+     * @param column
+     * @param value
+     * @return Clause
+     */
+    public Clause andGreaterEqual(String table, String column, Object value) {
 
         Clause c = new Clause(table);
         c.greaterEqual(column, value);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause orIsNull(String table, String column) {
+    /**
+     * Nulo
+     *
+     * @param column
+     * @return Clause
+     */
+    public Clause andIsNull(String column) {
+        return this.andIsNotNull(this.table, column);
+    }
+
+    /**
+     * Nulo
+     *
+     * @param table
+     * @param column
+     * @return Clause
+     */
+    public Clause andIsNull(String table, String column) {
 
         Clause c = new Clause(table);
         c.isNull(column);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause orIsNotNull(String table, String column) {
+    /**
+     * Não nulo
+     *
+     * @param column
+     * @return Clause
+     */
+    public Clause andIsNotNull(String column) {
+        return this.andIsNotNull(this.table, column);
+    }
+
+    /**
+     * Não nulo
+     *
+     * @param table
+     * @param column
+     * @return Clause
+     */
+    public Clause andIsNotNull(String table, String column) {
 
         Clause c = new Clause(table);
         c.isNotNull(column);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause orBetween(String table, String column, Object value1, Object value2) {
+    /**
+     * Entre
+     *
+     * @param column
+     * @param value1
+     * @param value2
+     * @return Clause
+     */
+    public Clause andBetween(String column, Object value1, Object value2) {
+        return this.andBetween(this.table, column, value1, value2);
+    }
+
+    /**
+     * Entre
+     *
+     * @param table
+     * @param column
+     * @param value1
+     * @param value2
+     * @return Clause
+     */
+    public Clause andBetween(String table, String column, Object value1, Object value2) {
 
         Clause c = new Clause(table);
         c.between(column, value1, value2);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause orIn(String table, String column, Object... values) {
+    /**
+     * Dentro
+     *
+     * @param column
+     * @param values
+     * @return Clause
+     */
+    public Clause andIn(String column, Object... values) {
+        return this.andIn(this.table, column, values);
+    }
+
+    /**
+     * Dentro
+     *
+     * @param table
+     * @param column
+     * @param values
+     * @return Clause
+     */
+    public Clause andIn(String table, String column, Object... values) {
 
         Clause c = new Clause(table);
         c.in(column, values);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
+        return this;
     }
 
-    public static Clause orNotIn(String table, String column, Object... values) {
+    /**
+     * Fora
+     *
+     * @param column
+     * @param values
+     * @return Clause
+     */
+    public Clause andNotIn(String column, Object... values) {
+        return this.andNotIn(this.table, column, values);
+    }
+
+    /**
+     * Fora
+     *
+     * @param table
+     * @param column
+     * @param values
+     * @return Clause
+     */
+    public Clause andNotIn(String table, String column, Object... values) {
 
         Clause c = new Clause(table);
         c.notIn(column, values);
-        c.clause = " OR (" + c.clause + ")";
+        this.clause += " AND " + c.clause;
 
-        return c;
-    }
-
-    public static Clause orLike(String table, Object filter) throws DatabaseException {
-
-        Clause c = new Clause(table);
-        c.like(filter);
-        c.clause = " OR (" + c.clause + ")";
-
-        return c;
-    }
-
-    public static Clause andEqual(String table, String column, Object value) {
-
-        Clause c = new Clause(table);
-        c.equal(column, value);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andNotEqual(String table, String column, Object value) {
-
-        Clause c = new Clause(table);
-        c.notEqual(column, value);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andLess(String table, String column, Object value) {
-
-        Clause c = new Clause(table);
-        c.less(column, value);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andGreater(String table, String column, Object value) {
-
-        Clause c = new Clause(table);
-        c.greater(column, value);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andLessEqual(String table, String column, Object value) {
-
-        Clause c = new Clause(table);
-        c.lessEqual(column, value);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andGreaterEqual(String table, String column, Object value) {
-
-        Clause c = new Clause(table);
-        c.greaterEqual(column, value);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andIsNull(String table, String column) {
-
-        Clause c = new Clause(table);
-        c.isNull(column);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andIsNotNull(String table, String column) {
-
-        Clause c = new Clause(table);
-        c.isNotNull(column);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andBetween(String table, String column, Object value1, Object value2) {
-
-        Clause c = new Clause(table);
-        c.between(column, value1, value2);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andIn(String table, String column, Object... values) {
-
-        Clause c = new Clause(table);
-        c.in(column, values);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andNotIn(String table, String column, Object... values) {
-
-        Clause c = new Clause(table);
-        c.notIn(column, values);
-        c.clause = " AND " + c.clause;
-
-        return c;
-    }
-
-    public static Clause andLike(String table, Object filter) throws DatabaseException {
-
-        Clause c = new Clause(table);
-        c.like(filter);
-        c.clause = " AND " + c.clause;
-
-        return c;
+        return this;
     }
 
     @Override
     public String toString() {
-        return clause == null ? "" : clause;
+        return this.clause == null ? "" : this.clause;
     }
 }

@@ -17,7 +17,6 @@
 package br.com.ctecinf.database;
 
 import br.com.ctecinf.json.JSONArray;
-import br.com.ctecinf.server.Server;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -58,12 +57,13 @@ public class Connection {
                 file.getParentFile().mkdirs();
             }
 
-            properties.put("url", "jdbc:firebirdsql:localhost:[path]");
+            properties.put("url", "jdbc:firebirdsql:localhost:");
+            properties.put("database", "data.fdb");
             properties.put("username", "sysdba");
             properties.put("password", "masterkey");
 
             try {
-                properties.store(new FileOutputStream(file), "Dados para conexão com o banco de dados\nEx. de URL: \"jdbc:firebirdsql:localhost:[path]\"\n");
+                properties.store(new FileOutputStream(file), "Dados para conexão com o banco de dados\nEx. de URL: \"jdbc:firebirdsql:localhost:\" | \"jdbc:derby:\" | \"jdbc:mysql://localhost:3306/\" | \"jdbc:postgresql://localhost:5432/\"\n");
             } catch (IOException ex) {
                 throw new DatabaseException(ex);
             }
@@ -93,7 +93,7 @@ public class Connection {
 
         try {
 
-            connection = DriverManager.getConnection(properties.getProperty("url"), properties.getProperty("username"), properties.getProperty("password"));
+            connection = DriverManager.getConnection(Connection.getURL(), properties.getProperty("username"), properties.getProperty("password"));
 
             File file = new File("config" + File.separator + "database" + File.separator + "metadata.json");
 
@@ -267,6 +267,10 @@ public class Connection {
      * @throws DatabaseException
      */
     public static String getURL() throws DatabaseException {
-        return getProperties().getProperty("url");
+
+        String url = getProperties().getProperty("url");
+        String db = getProperties().getProperty("url").contains("firebird") || getProperties().getProperty("url").contains("derby") ? new File(getProperties().getProperty("database")).getAbsolutePath() : getProperties().getProperty("database");
+
+        return url + db;
     }
 }

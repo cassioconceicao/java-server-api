@@ -1,0 +1,22 @@
+<form class="ctecinf-form" id="tableName" name="tableName" action="url" method="POST">
+
+    <fieldset>
+        <!--<legend></legend>-->
+
+        &fields
+
+    </fieldset>
+
+    <button type="button" class="ctecinf-button ctecinf-button-save" onclick="actionForm('tableName', 'save', 'url')">
+        Salvar
+    </button>
+
+    <button type="button" class="ctecinf-button ctecinf-button-delete" onclick="if(confirm('Deseja realmente excluír o registro?')) actionForm('tableName', 'delete', 'url')">
+        Apagar
+    </button>
+
+</form>
+
+<script type="text/javascript">
+    initForm('tableName');
+</script>

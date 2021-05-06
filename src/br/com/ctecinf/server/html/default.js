@@ -435,13 +435,34 @@ function initForm(formId) {
     }
 }
 
-function saveCliente() {
+/**
+ * AJAX com data[colunas] do formulário
+ * 
+ * @param {string} tableId Tabela
+ * @param {string} action Ação no controller, "delete", "save", ...
+ * @param {string} url URL do controller
+ */
+function actionForm(tableId, action, url) {
 
-}
+    if (action.length > 0) {
 
-function deleteCliente(id) {
-    if (confirm("Deseja realmente excluír registro ID[" + id + "]?")) {
+        var checkboxes = document.getElementsByClassName("ctecinf-table-checkbox");
+        var params = [];
 
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                params[params.length] = "id[]=" + checkboxes[i].value;
+                checkboxes[i].checked = false;
+            }
+        }
+
+        if (params.length === 0) {
+            alert("Nenhum registro selecionado.");
+        } else {
+            ajax(url, "table=" + tableId + "&action=" + action + "&" + params.join("&"), function (response, message) {
+                alert(message);
+            });
+        }
     }
 }
 

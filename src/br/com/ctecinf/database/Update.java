@@ -56,8 +56,8 @@ public class Update implements AutoCloseable {
      * Derby: id BIGINT GENERATED ALWAYS AS IDENTITY(START WITH 1, INCREMENT BY 1) NOT NULL PRIMARY KEY<br>
      * Mysql: id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT<br>
      * Postgres: id SERIAL NOT NULL PRIMARY KEY<br>
-     * Firbird: Criar sequenciador: id BIGINT NOT NULL PRIMARY KEY | CREATE
-     * SEQUENCE [table_name]_seq
+     * Firebird: Criar sequenciador: id BIGINT NOT NULL PRIMARY KEY | CREATE
+     * SEQUENCE seq_[table_name]_id
      * </code>
      */
     public void createInsertSQL() throws DatabaseException {
@@ -165,15 +165,22 @@ public class Update implements AutoCloseable {
             Object value = entry.getValue();
 
             if (value == null) {
-                update = update.replace(" :" + key, " null");
+                update = update.replace(" :" + key + ",", " NULL,");
+                update = update.replace(" :" + key + ")", " NULL)");
             } else {
-                update = update.replace(" :" + key, " '" + value + "'");
+                update = update.replace(" :" + key + ",", " '" + value + "',");
+                update = update.replace(" :" + key + ")", " '" + value + "')");
             }
         }
 
         for (String column : Metadata.getColumnsName(table)) {
-            if (update.contains(" :" + column)) {
-                update = update.replace(" :" + column, " null");
+
+            if (update.contains(" :" + column + ",")) {
+                update = update.replace(" :" + column + ",", " NULL,");
+            }
+
+            if (update.contains(" :" + column + ")")) {
+                update = update.replace(" :" + column + ")", " NULL)");
             }
         }
 

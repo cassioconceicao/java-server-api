@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -176,7 +177,67 @@ public class Server {
                         p.write(str.toString().replace("tableName", table).replace("limit", "1000").replace("url", "http://" + getProperties().getProperty("address") + ":" + getProperties().getProperty("port") + "/controller"));
                     }
                 }
+
+                String ipRegex = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+                String s = "";
+
+                try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        s += line + "\n";
+                    }
+                }
+
+                s = s.replaceAll(ipRegex, Server.getIpAddress());
+
+                try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
+                    p.write(s);
+                }
+
+                file = new File(dir, "form.html");
+
+                if (!file.exists()) {
+
+                    InputStream inputStream = getClass().getResourceAsStream("html/head.html");
+                    StringBuilder str = new StringBuilder();
+
+                    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+                        String line;
+                        while ((line = bufferedReader.readLine()) != null) {
+                            str.append(line).append("\n");
+                        }
+                    }
+
+                    inputStream = getClass().getResourceAsStream("html/form.html");
+
+                    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+                        String line;
+                        while ((line = bufferedReader.readLine()) != null) {
+                            str.append(line).append("\n");
+                        }
+                    }
+
+                    try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
+                        p.write(str.toString().replace("tableName", table).replace("url", "http://" + getProperties().getProperty("address") + ":" + getProperties().getProperty("port") + "/controller"));
+                    }
+                }
+
+                s = "";
+
+                try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        s += line + "\n";
+                    }
+                }
+
+                s = s.replaceAll(ipRegex, Server.getIpAddress());
+
+                try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
+                    p.write(s);
+                }
             }
+
         } catch (IOException | DatabaseException ex) {
             throw new ServerException(ex);
         }
@@ -216,7 +277,7 @@ public class Server {
             throw new ServerException(ex);
         }
 
-        properties.replace("address", getIpAddress());
+        properties.replace("address", Server.getIpAddress());
 
         try {
             properties.store(new FileOutputStream(file), "Configuração do servidor");

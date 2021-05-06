@@ -43,26 +43,56 @@ public class Query implements AutoCloseable {
     private java.sql.Connection connection;
     private Statement st;
 
+    private boolean isFirebird;
+
+    private String fullQuery;
     private String query;
+    private String limit;
+    private Clause clause;
+    private List<String> orderBy;
 
     /**
      * Construtor
      *
      * @param table Nome da tabela
-     * @param clauses Claúsulas <i>WHERE</i>
      * @throws DatabaseException
      */
-    public Query(String table, Clause... clauses) throws DatabaseException {
+    public Query(String table) throws DatabaseException {
+        this(table, null);
+    }
+
+    /**
+     * Construtor
+     *
+     * @param table Nome da tabela
+     * @param clause Claúsulas <i>WHERE</i>
+     * @throws DatabaseException
+     */
+    public Query(String table, Clause clause) throws DatabaseException {
 
         this.table = table.toLowerCase().trim();
+        this.clause = clause;
+        this.isFirebird = Connection.getURL().toLowerCase().contains("firebird");
+        this.orderBy = new ArrayList();
 
         try {
-            connection = Connection.open();
-            st = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            query = createQuery(table, clauses);
+            this.connection = Connection.open();
+            this.st = this.connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            this.createQuery(table);
         } catch (SQLException ex) {
             throw new DatabaseException(ex);
         }
+    }
+
+    /**
+     * CRia nova consulta
+     *
+     * @param table
+     * @return Query
+     * @throws DatabaseException
+     */
+    public static Query create(String table) throws DatabaseException {
+        return new Query(table);
     }
 
     /**
@@ -71,18 +101,16 @@ public class Query implements AutoCloseable {
      * @return String
      */
     public String getTable() {
-        return table;
+        return this.table;
     }
 
     /**
      * Cria a consulta
      *
      * @param table
-     * @param clauses
-     * @return String
      * @throws DatabaseException
      */
-    protected final String createQuery(String table, Clause... clauses) throws DatabaseException {
+    protected final void createQuery(String table) throws DatabaseException {
 
         List<String> columns = new ArrayList();
 
@@ -112,34 +140,28 @@ public class Query implements AutoCloseable {
             }
         }
 
-        String q = "SELECT " + Arrays.stream(columns.toArray()).map(String::valueOf).collect(Collectors.joining(", ")) + " FROM " + table + join;
+        this.query = "SELECT " + Arrays.stream(columns.toArray()).map(String::valueOf).collect(Collectors.joining(", ")) + " FROM " + table + join;
+    }
 
-        if (clauses != null && clauses.length > 0) {
-
-            q += " WHERE ";
-
-            for (Clause clause : clauses) {
-                if (clause != null) {
-                    q += clause;
-                }
-            }
-        }
-
-        return q;
+    /**
+     * Adiciona Claúsula
+     *
+     * @param clause
+     * @return Query
+     */
+    public Query setClause(Clause clause) {
+        this.clause = clause;
+        return this;
     }
 
     /**
      * Lista com campos para ordenação
      *
-     * @param columnsName
+     * @param columns
      * @return Query
      */
-    public Query orderBy(Object... columnsName) {
-
-        if (columnsName.length > 0) {
-            query += " ORDER BY " + table + "." + Arrays.stream(columnsName).map(String::valueOf).collect(Collectors.joining(", " + table + "."));
-        }
-
+    public Query orderBy(String... columns) {
+        this.orderBy = Arrays.asList(columns);
         return this;
     }
 
@@ -164,14 +186,14 @@ public class Query implements AutoCloseable {
      */
     public Query setLimit(int offSet, int maxResults) throws DatabaseException {
 
-        if (Connection.getURL().toLowerCase().contains("firebird")) {
-            query = "SELECT " + LIMIT_FIREBIRD.replace("{offSet}", String.valueOf(offSet)).replace("{maxResults}", String.valueOf(maxResults)) + query.substring(7);
+        if (this.isFirebird) {
+            this.limit = Query.LIMIT_FIREBIRD.replace("{offSet}", String.valueOf(offSet)).replace("{maxResults}", String.valueOf(maxResults));
         } else if (Connection.getURL().toLowerCase().contains("derby")) {
-            query += LIMIT_DERBY.replace("{offSet}", String.valueOf(offSet)).replace("{maxResults}", String.valueOf(maxResults));
+            this.limit = Query.LIMIT_DERBY.replace("{offSet}", String.valueOf(offSet)).replace("{maxResults}", String.valueOf(maxResults));
         } else if (Connection.getURL().toLowerCase().contains("postgres")) {
-            query += LIMIT_POSTGRES.replace("{offSet}", String.valueOf(offSet)).replace("{maxResults}", String.valueOf(maxResults));
+            this.limit = Query.LIMIT_POSTGRES.replace("{offSet}", String.valueOf(offSet)).replace("{maxResults}", String.valueOf(maxResults));
         } else {
-            query += LIMIT_MYSQL.replace("{offSet}", String.valueOf(offSet)).replace("{maxResults}", String.valueOf(maxResults));
+            this.limit = Query.LIMIT_MYSQL.replace("{offSet}", String.valueOf(offSet)).replace("{maxResults}", String.valueOf(maxResults));
         }
 
         return this;
@@ -185,7 +207,7 @@ public class Query implements AutoCloseable {
      */
     public ResultSet getResultSet() throws DatabaseException {
         try {
-            return st.executeQuery(query);
+            return this.st.executeQuery(this.toString());
         } catch (SQLException ex) {
             throw new DatabaseException(ex);
         }
@@ -203,13 +225,13 @@ public class Query implements AutoCloseable {
         try (ResultSet rs = this.getResultSet()) {
 
             JSONArray array = new JSONArray();
-            String idKey = Metadata.getPrimaryKeyName(table);
+            String idKey = Metadata.getPrimaryKeyName(this.table);
 
             while (rs.next()) {
 
-                JSONObject data = getData(table, rs);
+                JSONObject data = this.getData(this.table, rs);
 
-                String toString = ORM.toString(table);
+                String toString = ORM.toString(this.table);
                 String idValue = "";
 
                 for (String key : data.keySet()) {
@@ -276,17 +298,17 @@ public class Query implements AutoCloseable {
     @Override
     public void close() throws DatabaseException {
 
-        if (st != null) {
+        if (this.st != null) {
             try {
-                st.close();
+                this.st.close();
             } catch (SQLException ex) {
                 throw new DatabaseException(ex);
             }
         }
 
-        if (connection != null) {
+        if (this.connection != null) {
             try {
-                connection.close();
+                this.connection.close();
             } catch (SQLException ex) {
                 throw new DatabaseException(ex);
             }
@@ -295,6 +317,43 @@ public class Query implements AutoCloseable {
 
     @Override
     public String toString() {
-        return query;
+
+        if (this.fullQuery == null) {
+
+            this.fullQuery = this.query;
+
+            if (this.clause != null && !this.clause.toString().isEmpty()) {
+                this.fullQuery += " WHERE " + this.clause;
+            }
+
+            if (!this.orderBy.isEmpty()) {
+
+                this.fullQuery += " ORDER BY ";
+
+                for (int i = 0; i < this.orderBy.size(); i++) {
+
+                    if (this.orderBy.get(i).contains(".")) {
+                        this.fullQuery += this.orderBy.get(i);
+                    } else {
+                        this.fullQuery += this.table + "." + this.orderBy.get(i);
+                    }
+
+                    if (i < this.orderBy.size() - 1) {
+                        this.fullQuery += ", ";
+                    }
+                }
+            }
+
+            if (this.limit != null) {
+                if (this.isFirebird) {
+                    this.fullQuery = "SELECT " + this.limit + this.fullQuery.substring(7);
+                } else {
+                    this.fullQuery += this.limit;
+                }
+            }
+        }
+        
+        return this.fullQuery;
     }
+
 }

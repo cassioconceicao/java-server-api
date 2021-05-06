@@ -51,25 +51,47 @@ public abstract class Handler implements HttpHandler {
     private final String name;
     private final String contentType;
 
+    /**
+     * Construtor
+     */
     public Handler() {
-        this.name = "";
-        this.contentType = Handler.TYPE_PLAIN;
+        this("", Handler.TYPE_PLAIN);
     }
 
+    /**
+     * Construtor
+     *
+     * @param name
+     */
     public Handler(String name) {
-        this.name = name;
-        this.contentType = Handler.TYPE_PLAIN;
+        this(name, Handler.TYPE_PLAIN);
     }
 
+    /**
+     * Construtor
+     *
+     * @param name
+     * @param contentType
+     */
     public Handler(String name, String contentType) {
         this.name = name;
         this.contentType = contentType;
     }
 
+    /**
+     * Nome do serviço
+     *
+     * @return String
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Tipo do serviço
+     *
+     * @return String
+     */
     public String getContentType() {
         return contentType;
     }
@@ -111,7 +133,7 @@ public abstract class Handler implements HttpHandler {
                 query = URLDecoder.decode(post, "UTF-8").trim();
             }
         }
-        
+
         if (query != null && !query.isEmpty()) {
             params = parseParams(query);
         }
@@ -133,6 +155,12 @@ public abstract class Handler implements HttpHandler {
         }
     }
 
+    /**
+     * Configura os parâmetros da requisição
+     *
+     * @param query
+     * @return Map
+     */
     private Map<String, Object> parseParams(String query) {
 
         String[] split = query.split("&");

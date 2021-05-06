@@ -66,7 +66,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 .ctecinf-input {background-color: var(--input-color);color: var(--text-color);border-radius: 5px;border: 1px solid var(--border-color);font-size: var(--font-size);padding: 12px;margin-bottom: 12px;box-shadow: inset 0 3px 6px rgba(0,0,0,0.2)}
 .ctecinf-input[type=text] {width: 80%}
-.ctecinf-input[type=numeric] {background-image: var(--keyboard-icon);background-position: 95% 50%;background-repeat: no-repeat;cursor: pointer;width: 200px}
+.ctecinf-input[type=tel] {background-image: var(--keyboard-icon);background-position: 95% 50%;background-repeat: no-repeat;cursor: pointer;width: 200px}
 .ctecinf-input[type=time] {background-image: var(--keyboard-icon);background-position: 95% 50%;background-repeat: no-repeat;cursor: pointer;width: 200px}
 .ctecinf-input[type=date] {background-image: var(--keyboard-icon);background-position: 85% 50%;background-repeat: no-repeat;cursor: pointer;width: 190px}
 .ctecinf-input[type=date]::-webkit-inner-spin-button {display: none}
