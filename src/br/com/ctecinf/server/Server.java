@@ -17,18 +17,11 @@
 package br.com.ctecinf.server;
 
 import br.com.ctecinf.database.DatabaseException;
-import br.com.ctecinf.database.Metadata;
 import com.sun.net.httpserver.HttpServer;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -65,181 +58,19 @@ public class Server {
 
         services = new ArrayList();
 
-        try {
+        File root = new File("html");
 
-            File root = new File("html");
+        if (!root.exists()) {
+            root.mkdirs();
+        }
 
-            if (!root.exists()) {
-                root.mkdirs();
+        File dir = new File(root, "js");
+
+        if (!dir.exists()) {
+            dir.mkdirs();
+            try (Lib lib = new Lib("default.js")) {
+                lib.download(dir);
             }
-
-            File dir = new File(root, "js");
-
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            File file = new File(dir, "default.js");
-
-            if (!file.exists()) {
-
-                InputStream inputStream = getClass().getResourceAsStream("html/default.js");
-                StringBuilder str = new StringBuilder();
-
-                try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        str.append(line).append("\n");
-                    }
-                }
-
-                try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
-                    p.write(str.toString());
-                }
-            }
-
-            dir = new File(root, "css");
-
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            file = new File(dir, "config.css");
-
-            if (!file.exists()) {
-
-                InputStream inputStream = getClass().getResourceAsStream("html/config.txt");
-                StringBuilder str = new StringBuilder();
-
-                try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        str.append(line).append("\n");
-                    }
-                }
-
-                try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
-                    p.write(str.toString());
-                }
-            }
-
-            file = new File(dir, "default.css");
-
-            if (!file.exists()) {
-
-                InputStream inputStream = getClass().getResourceAsStream("html/default.txt");
-                StringBuilder str = new StringBuilder();
-
-                try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        str.append(line).append("\n");
-                    }
-                }
-
-                try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
-                    p.write(str.toString());
-                }
-            }
-
-            for (String table : Metadata.getTables()) {
-
-                dir = new File(root, table);
-
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
-
-                file = new File(dir, "table.html");
-
-                if (!file.exists()) {
-
-                    InputStream inputStream = getClass().getResourceAsStream("html/head.html");
-                    StringBuilder str = new StringBuilder();
-
-                    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-                        String line;
-                        while ((line = bufferedReader.readLine()) != null) {
-                            str.append(line).append("\n");
-                        }
-                    }
-
-                    inputStream = getClass().getResourceAsStream("html/table.html");
-
-                    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-                        String line;
-                        while ((line = bufferedReader.readLine()) != null) {
-                            str.append(line).append("\n");
-                        }
-                    }
-
-                    try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
-                        p.write(str.toString().replace("tableName", table).replace("limit", "1000").replace("url", "http://" + getProperties().getProperty("address") + ":" + getProperties().getProperty("port") + "/controller"));
-                    }
-                }
-
-                String ipRegex = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
-                String s = "";
-
-                try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        s += line + "\n";
-                    }
-                }
-
-                s = s.replaceAll(ipRegex, Server.getIpAddress());
-
-                try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
-                    p.write(s);
-                }
-
-                file = new File(dir, "form.html");
-
-                if (!file.exists()) {
-
-                    InputStream inputStream = getClass().getResourceAsStream("html/head.html");
-                    StringBuilder str = new StringBuilder();
-
-                    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-                        String line;
-                        while ((line = bufferedReader.readLine()) != null) {
-                            str.append(line).append("\n");
-                        }
-                    }
-
-                    inputStream = getClass().getResourceAsStream("html/form.html");
-
-                    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-                        String line;
-                        while ((line = bufferedReader.readLine()) != null) {
-                            str.append(line).append("\n");
-                        }
-                    }
-
-                    try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
-                        p.write(str.toString().replace("tableName", table).replace("url", "http://" + getProperties().getProperty("address") + ":" + getProperties().getProperty("port") + "/controller"));
-                    }
-                }
-
-                s = "";
-
-                try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        s += line + "\n";
-                    }
-                }
-
-                s = s.replaceAll(ipRegex, Server.getIpAddress());
-
-                try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
-                    p.write(s);
-                }
-            }
-
-        } catch (IOException | DatabaseException ex) {
-            throw new ServerException(ex);
         }
     }
 

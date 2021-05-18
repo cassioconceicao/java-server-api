@@ -34,6 +34,16 @@ import java.sql.Types;
  */
 public class DataType {
 
+    public static final String STRING = "String";
+    public static final String BOOLEAN = "Boolean";
+    public static final String TEXT = "Text";
+    public static final String DATE = "Date";
+    public static final String TIME = "Time";
+    public static final String TIMESTAMP = "Timestamp";
+    public static final String DECIMAL = "Decimal";
+    public static final String INTEGER = "Integer";
+    public static final String FOREIGN = "Foreign";
+
     /**
      * Converte tipo de dado do banco de dados para tipo Java
      *
