@@ -17,7 +17,9 @@
 package br.com.ctecinf.server;
 
 import br.com.ctecinf.database.Clause;
+import br.com.ctecinf.database.Metadata;
 import br.com.ctecinf.database.Query;
+import java.sql.ResultSet;
 import java.util.Map;
 
 /**
@@ -36,46 +38,57 @@ public class Controller extends Handler {
     protected byte[] getResponse(Map<String, Object> requestParams) throws Exception {
 
         String table = (String) requestParams.get(AJAX.PARAM_NAME_TABLE);
-
-        if (table == null) {
-            return "{\"message\": \"Parâmetro 'table' nulo.\", \"type\": \"error\", \"return\": \"false\"}".getBytes();
-        }
-
         String action = (String) requestParams.get(AJAX.PARAM_NAME_ACTION);
-
-        if (action == null) {
-            return "{\"message\": \"Parâmetro 'action' nulo.\", \"type\": \"error\", \"return\": \"false\"}".getBytes();
-        }
-
         String term = requestParams.get(AJAX.PARAM_NAME_TERM) == null ? "" : (String) requestParams.get(AJAX.PARAM_NAME_TERM);
         Integer offset = requestParams.get(AJAX.PARAM_NAME_OFFSET) == null ? 0 : Integer.parseInt(requestParams.get(AJAX.PARAM_NAME_OFFSET).toString());
         Integer limit = requestParams.get(AJAX.PARAM_NAME_LIMIT) == null ? 100 : Integer.parseInt(requestParams.get(AJAX.PARAM_NAME_LIMIT).toString());
 
         switch (action) {
 
-            case AJAX.PARAM_VALUE_CRUD:
-                try (Query query = new Query(table, Clause.create(table).like(term)).setLimit(offset, limit)) {
-                    return query.getJSON().toString().getBytes();
-                } catch (Exception ex) {
-                    return ("{\"message\": \"" + ex.getMessage() + "\", \"type\": \"exception\", \"return\": \"false\"}").getBytes();
-                }
-
             case AJAX.PARAM_VALUE_QUERY:
-                try (Query query = new Query(table, Clause.create(table).like(term)).setLimit(offset, limit)) {
-                    return query.getJSON().toString().getBytes();
+
+                try (Query query = new Query(table, Clause.create(table).like(term)).setLimit(offset, limit); ResultSet rs = query.getResultSet()) {
+
+                    StringBuilder json = new StringBuilder();
+                    json.append("{\"primary_key\": \"").append(Metadata.getPrimaryKeyName(table)).append("\", ");
+                    json.append("\"columns\": ").append(Metadata.getColumns(table)).append(",");
+                    json.append("\"data\": ").append(query.getJSONData()).append("}");
+
+                    return json.toString().getBytes();
+
                 } catch (Exception ex) {
-                    return ("{\"message\": \"" + ex.getMessage() + "\", \"type\": \"exception\", \"return\": \"false\"}").getBytes();
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Exception: ").append(ex.getMessage()).append("\\n");
+
+                    for (StackTraceElement stackTrace : ex.getStackTrace()) {
+                        if (stackTrace.getClassName().contains("ctecinf")) {
+                            sb.append("Class: ").append(stackTrace.getClassName()).append("\\n");
+                            sb.append("File: ").append(stackTrace.getFileName()).append("\\n");
+                            sb.append("Line: ").append(stackTrace.getLineNumber()).append("\\n");
+                            sb.append("Method: ").append(stackTrace.getMethodName());
+                            break;
+                        }
+                    }
+
+                    return ("{\"message\": \"" + sb + "\", \"type\": \"exception\"}").getBytes();
                 }
 
             case AJAX.PARAM_VALUE_SAVE:
-                return "{\"message\": \"Registro salvo com sucesso.\", \"type\": \"success\", \"return\": \"true\"}".getBytes();
+                return "{\"message\": \"Registro salvo com sucesso.\", \"type\": \"success\"}".getBytes();
 
             case AJAX.PARAM_VALUE_DELETE:
-                return "{\"message\": \"Registro apagado com sucesso.\", \"type\": \"success\", \"return\": \"true\"}".getBytes();
+                return "{\"message\": \"Registro apagado com sucesso.\", \"type\": \"success\"}".getBytes();
 
             default:
-                return "{\"message\": \"Parâmetros faltando.\", \"type\": \"error\", \"return\": \"false\"}".getBytes();
+                return "{\"message\": \"Parâmetro 'action' inválido.\", \"type\": \"error\"}".getBytes();
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Server server = new Server();
+        server.addContext(new Controller());
+        server.start();
     }
 
 }

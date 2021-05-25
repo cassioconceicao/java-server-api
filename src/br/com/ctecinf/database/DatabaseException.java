@@ -35,6 +35,27 @@ public class DatabaseException extends Exception {
     }
 
     public void show() {
-        JOptionPane.showMessageDialog(null, this, "Exception", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(null, this.getMessage(), "Exception", JOptionPane.ERROR_MESSAGE);
+    }
+
+    @Override
+    public String getMessage() {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Exception: ").append(super.getMessage()).append("\n");
+
+        for (StackTraceElement stackTrace : getStackTrace()) {
+            if (stackTrace.getClassName().contains("ctecinf")) {
+                sb.append("Class: ").append(stackTrace.getClassName()).append("\n");
+                sb.append("File: ").append(stackTrace.getFileName()).append("\n");
+                sb.append("Line: ").append(stackTrace.getLineNumber()).append("\n");
+                sb.append("Method: ").append(stackTrace.getMethodName());
+                break;
+            }
+        }
+
+        System.err.println(sb);
+        
+        return sb.toString();
     }
 }

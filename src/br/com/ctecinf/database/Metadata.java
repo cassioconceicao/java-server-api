@@ -21,6 +21,12 @@ import br.com.ctecinf.json.JSONObject;
 import br.com.ctecinf.json.JSONArray;
 import br.com.ctecinf.json.JSONException;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,6 +64,131 @@ public class Metadata {
         }
 
         return json;
+    }
+
+    /**
+     * Cria arquivo Metadata
+     *
+     * @param file Arquivo para salvar o JSON dos metadados.
+     * @param connection Conexão com o banco de dados.
+     * @throws DatabaseException
+     */
+    public static void createMetadata(File file, java.sql.Connection connection) throws DatabaseException {
+
+        try {
+
+            StringBuilder metadata = new StringBuilder("{\n");
+
+            List<String> sequences = new ArrayList();
+
+            if (connection.getMetaData().getURL().toLowerCase().contains("firebird")) {
+                String query = "SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS";
+                try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(query)) {
+                    while (rs.next()) {
+                        sequences.add(rs.getString(1).toLowerCase().trim());
+                    }
+                }
+            }
+
+            try (ResultSet resultSet = connection.getMetaData().getTables(null, null, null, new String[]{"TABLE"})) {
+
+                while (resultSet.next()) {
+
+                    String table = resultSet.getString(3).toLowerCase().trim();
+
+                    metadata.append("  \"").append(table).append("\":{\n");
+                    metadata.append("    \"sequence\":\"");
+
+                    if (connection.getMetaData().getURL().toLowerCase().contains("firebird")) {
+                        for (String sequence : sequences) {
+                            if (sequence.contains(table)) {
+                                metadata.append(sequence);
+                                break;
+                            }
+                        }
+                    }
+
+                    metadata.append("\",\n");
+
+                    try (ResultSet rs = connection.getMetaData().getPrimaryKeys(null, null, table)) {
+                        if (rs.next()) {
+                            metadata.append("    \"primary_key\":\"").append(rs.getString(4).trim().toLowerCase()).append("\",\n");
+                        }
+                    }
+
+                    try (ResultSet rs = connection.getMetaData().getColumns(null, null, table, "%")) {
+
+                        metadata.append("    \"columns\":[\n");
+
+                        while (rs.next()) {
+
+                            String column = rs.getString(4).trim().toLowerCase();
+                            int type = rs.getInt(5);
+                            String typeName = rs.getString(6);
+                            int length = rs.getInt(7);
+                            boolean notNull = rs.getString(18).toLowerCase().equals("no");
+
+                            metadata.append("        {\n");
+                            metadata.append("          \"name\":\"").append(column).append("\",\n");
+                            metadata.append("          \"type\":\"").append(DataType.parse(type, length)).append("\",\n");
+                            metadata.append("          \"data_type\":\"").append(type).append("\",\n");
+                            metadata.append("          \"type_name\":\"").append(typeName).append("\",\n");
+                            metadata.append("          \"length\":\"").append(length).append("\",\n");
+                            metadata.append("          \"not_null\":\"").append(notNull).append("\"\n");
+                            metadata.append("        }");
+
+                            if (!rs.isLast()) {
+                                metadata.append(",\n");
+                            } else {
+                                metadata.append("\n");
+                            }
+                        }
+
+                        metadata.append("    ],\n");
+                    }
+
+                    try (ResultSet resultSetForeignKey = connection.getMetaData().getImportedKeys(null, null, table)) {
+
+                        metadata.append("    \"foreign_key\":{\n");
+
+                        while (resultSetForeignKey.next()) {
+
+                            String column = resultSetForeignKey.getString(8).trim().toLowerCase();
+                            String reference = resultSetForeignKey.getString(3).trim().toLowerCase();
+
+                            metadata.append("      \"").append(column).append("\":\"").append(reference).append("\"");
+
+                            if (!resultSetForeignKey.isLast()) {
+                                metadata.append(",\n");
+                            } else {
+                                metadata.append("\n");
+                            }
+                        }
+
+                        metadata.append("    }\n");
+                    }
+
+                    metadata.append("  }");
+
+                    if (!resultSet.isLast()) {
+                        metadata.append(",\n");
+                    }
+                }
+            }
+
+            metadata.append("\n}");
+
+            if (file.getParentFile() != null && !file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+
+            try (PrintWriter p = new PrintWriter(new FileWriter(file, false))) {
+                p.write(metadata.toString());
+            }
+
+        } catch (IOException | SQLException ex) {
+            throw new DatabaseException(ex);
+        }
     }
 
     /**
@@ -113,13 +244,23 @@ public class Metadata {
      * @return JSONArray
      * @throws DatabaseException
      */
-    protected static JSONArray getColumns(String table) throws DatabaseException {
+    public static JSONArray getColumns(String table) throws DatabaseException {
 
         if (table == null || table.isEmpty()) {
             return null;
         }
 
-        return Metadata.get().getJSONObjectValue(table.toLowerCase().trim()).getJSONArrayValue("columns");
+        JSONArray columns = Metadata.get().getJSONObjectValue(table.toLowerCase().trim()).getJSONArrayValue("columns");
+
+        JSONObject labels = ORM.getLabels(table);
+
+        if (labels != null) {
+            columns.stream().forEach((column) -> {
+                column.put("label", labels.getStringValue(column.getStringValue("name")));
+            });
+        }
+
+        return columns;
     }
 
     /**

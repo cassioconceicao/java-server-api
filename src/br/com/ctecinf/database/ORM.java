@@ -71,7 +71,7 @@ public class ORM {
 
         String value = ORM.get().getJSONObjectValue(table.toLowerCase().trim()).getStringValue("to_string");
 
-        return value.isEmpty() ? null : value.toLowerCase().trim();
+        return value.isEmpty() ? null : value.trim();
     }
 
     /**

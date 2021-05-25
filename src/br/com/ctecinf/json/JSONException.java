@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package br.com.ctecinf.server;
+package br.com.ctecinf.json;
 
 import javax.swing.JOptionPane;
 
@@ -22,15 +22,15 @@ import javax.swing.JOptionPane;
  *
  * @author Cássio Conceição
  * @version 2021
- * @see http://ctecinf.com.br
+ * @see http://ctecinf.com.br/
  */
-public class ServerException extends Exception {
+public class JSONException extends Exception {
 
-    public ServerException(String message) {
+    public JSONException(String message) {
         super(message);
     }
 
-    public ServerException(Throwable cause) {
+    public JSONException(Throwable cause) {
         super(cause);
     }
 

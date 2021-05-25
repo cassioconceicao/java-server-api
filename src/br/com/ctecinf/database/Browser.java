@@ -16,6 +16,7 @@
  */
 package br.com.ctecinf.database;
 
+import br.com.ctecinf.server.Controller;
 import br.com.ctecinf.server.Handler;
 import br.com.ctecinf.server.Server;
 import java.awt.BorderLayout;
@@ -294,58 +295,15 @@ public class Browser extends JFrame {
         Connection.open();
 
         Server server = new Server();
-        server.addContext(new Handler("controller", Handler.TYPE_JSON) {
-            @Override
-            protected byte[] getResponse(Map<String, Object> requestParams) throws Exception {
-
-                String table = (String) requestParams.get("table");
-
-                if (table == null) {
-                    throw new Exception("Parâmetro 'table' nulo.");
-                }
-
-                String action = (String) requestParams.get("action");
-
-                if (action == null) {
-                    throw new Exception("Parâmetro 'action' nulo.");
-                }
-
-                String term = requestParams.get("term") == null ? "" : (String) requestParams.get("term");
-                Integer offset = requestParams.get("offset") == null ? 0 : Integer.parseInt(requestParams.get("offset").toString());
-                Integer limit = requestParams.get("limit") == null ? 1000 : Integer.parseInt(requestParams.get("limit").toString());
-
-                switch (action) {
-
-                    case "find":
-                        try (Query query = new Query(table, Clause.create(table).like(term)).setLimit(offset, limit)) {
-                            return query.getJSON().toString().getBytes();
-                        }
-
-                    case "count":
-                        try (Count count = new Count(table)) {
-                            return ("{\"total\": \"" + count.getTotal() + "\"}").getBytes();
-                        }
-
-                    case "save":
-                        return "{\"message\": \"Save.\"}".getBytes();
-
-                    case "delete":
-                        return "{\"message\": \"Delete.\"}".getBytes();
-
-                    default:
-                        return "{\"message\": \"Parâmetros faltando.\"}".getBytes();
-                }
-            }
-        });
+        server.addContext(new Controller());
         server.start();
 
         Browser browser = new Browser();
         browser.setVisible(true);
 
         try {
-
-            File file = new File("html", "fornecedor/table.html");
-            browser.load("file://" + file.getAbsolutePath());
+  
+            browser.load("http://localhost/php/orm/view/Municipio/");
 
         } catch (MalformedURLException ex) {
             JOptionPane.showMessageDialog(null, ex, "Exception", JOptionPane.ERROR_MESSAGE);

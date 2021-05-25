@@ -216,43 +216,35 @@ public class Query implements AutoCloseable {
     /**
      * Retorna o resultado da consulta em JSONArray
      *
-     * @return JSONArray [ { "label": "<i>to_string</i>",
-     * "value":"<i>primary_key</i>", "data": { "column": "value", ...} }, ... ]
+     * @return JSONArray [{ <br>
+     * "label": "<i>to_string</i>",<br>
+     * "value":"<i>primary_key</i>",<br>
+     * "column_1": "value_1",<br>
+     * "column_2": "value_2",...<br>
+     * }, ...]
      * @throws DatabaseException
      */
-    public JSONArray getJSON() throws DatabaseException {
+    public JSONArray getJSONData() throws DatabaseException {
 
         try (ResultSet rs = this.getResultSet()) {
 
             JSONArray array = new JSONArray();
-            String idKey = Metadata.getPrimaryKeyName(this.table);
 
             while (rs.next()) {
 
-                JSONObject data = this.getData(this.table, rs);
+                JSONObject data = this.getRowData(this.table, rs);
 
-                String toString = ORM.toString(this.table);
-                String idValue = "";
+                String label = ORM.toString(this.table);
+                String value = data.getStringValue(Metadata.getPrimaryKeyName(this.table));
 
                 for (String key : data.keySet()) {
-
-                    String value = data.getStringValue(key);
-
-                    if (value != null && !value.isEmpty()) {
-                        toString = toString.replace("{" + key + "}", value);
-                    }
-
-                    if (data.containsKey(idKey)) {
-                        idValue = data.getStringValue(idKey);
-                    }
+                    label = label.replace("{" + key + "}", data.getStringValue(key) == null ? "" : data.getStringValue(key));
                 }
 
-                JSONObject row = new JSONObject();
-                row.put("label", toString);
-                row.put("value", idValue);
-                row.put("data", data);
+                data.put("value", value);
+                data.put("label", label);
 
-                array.add(row);
+                array.add(data);
             }
 
             return array;
@@ -270,7 +262,7 @@ public class Query implements AutoCloseable {
      * @return JSONObject
      * @throws DatabaseException
      */
-    private JSONObject getData(String table, ResultSet rs) throws DatabaseException {
+    private JSONObject getRowData(String table, ResultSet rs) throws DatabaseException {
 
         List<String> columns = Metadata.getColumnsName(table);
         JSONObject reference = Metadata.getReferencedTables(table);
@@ -285,7 +277,7 @@ public class Query implements AutoCloseable {
                 try {
                     int index = rs.findColumn(table + "_" + column);
                     if (index > -1) {
-                        data.put(reference.getStringValue(column), getData(reference.getStringValue(column), rs));
+                        data.put(reference.getStringValue(column), getRowData(reference.getStringValue(column), rs));
                     }
                 } catch (SQLException ex) {
                 }
@@ -352,7 +344,7 @@ public class Query implements AutoCloseable {
                 }
             }
         }
-        
+
         return this.fullQuery;
     }
 

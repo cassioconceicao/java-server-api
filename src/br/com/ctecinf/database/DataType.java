@@ -45,6 +45,61 @@ public class DataType {
     public static final String FOREIGN = "Foreign";
 
     /**
+     *
+     * @param type Tipo do campo
+     * @return String Descrição do campo
+     */
+    public static String parse(int type) {
+        return parse(type, 0);
+    }
+
+    /**
+     *
+     * @param type Tipo do campo
+     * @param length Tamanho do campo
+     * @return String Descrição do campo
+     */
+    public static String parse(int type, int length) {
+
+        switch (type) {
+
+            case Types.BIGINT:
+            case Types.BINARY:
+            case Types.BIT:
+            case Types.INTEGER:
+            case Types.SMALLINT:
+            case Types.ROWID:
+                return DataType.INTEGER;
+
+            case Types.DECIMAL:
+            case Types.DOUBLE:
+            case Types.FLOAT:
+            case Types.REAL:
+                return DataType.DECIMAL;
+
+            case Types.BLOB:
+            case Types.LONGVARCHAR:
+                return DataType.TEXT;
+
+            case Types.BOOLEAN:
+            case Types.TINYINT:
+                return DataType.BOOLEAN;
+
+            case Types.DATE:
+                return DataType.DATE;
+
+            case Types.TIME:
+                return DataType.TIME;
+
+            case Types.TIMESTAMP:
+                return DataType.TIMESTAMP;
+
+            default:
+                return length > 255 ? DataType.TEXT : DataType.STRING;
+        }
+    }
+
+    /**
      * Converte tipo de dado do banco de dados para tipo Java
      *
      * @param type
