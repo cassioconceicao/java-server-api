@@ -1,4 +1,4 @@
-# java-database-api
+# java-server-api
 Interface de programação de aplicativo escrita em Java para gerenciamento do Banco de dados da aplicação.
 
 Exemplo:
