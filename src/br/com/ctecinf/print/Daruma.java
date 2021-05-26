@@ -556,12 +556,54 @@ public class Daruma {
     /**
      * Escreve texto
      *
-     * @param str
+     * @param str tag 'b' para texto negrito e tag 'i' para italico são aceita
      * @throws DarumaException
      */
     public void text(String str) throws DarumaException {
+
         try {
-            outputStream.write(str.getBytes());
+
+            int indexBold = str.toLowerCase().indexOf("<b>");
+            int indexItalic = str.toLowerCase().indexOf("<i>");
+
+            if (indexBold > -1 || indexItalic > -1) {
+
+                int index;
+                String tag;
+
+                if (indexBold == -1) {
+                    index = indexItalic;
+                    tag = "</i>";
+                } else if (indexItalic == -1) {
+                    index = indexBold;
+                    tag = "</b>";
+                } else {
+                    index = indexBold < indexItalic ? indexBold : indexItalic;
+                    tag = indexBold < indexItalic ? "</b>" : "</i>";
+                }
+
+                if (index > 0) {
+                    outputStream.write(str.substring(0, index).getBytes());
+                    text(str.substring(index));
+                } else if (index == 0) {
+
+                    int end = str.toLowerCase().indexOf(tag);
+
+                    if (tag.equalsIgnoreCase("</b>")) {
+                        bold(str.substring(3, end));
+                    } else {
+                        italic(str.substring(3, end));
+                    }
+
+                    if ((end + 4) < str.length()) {
+                        text(str.substring(end + 4));
+                    }
+                }
+
+            } else {
+                outputStream.write(str.getBytes());
+            }
+
         } catch (IOException ex) {
             throw new DarumaException(ex);
         }
@@ -574,9 +616,10 @@ public class Daruma {
      * @throws DarumaException
      */
     public void textNormal(String str) throws DarumaException {
+
         try {
             outputStream.write(new String(TEXT_NORMAL).getBytes());
-            outputStream.write(str.getBytes());
+            text(str);
         } catch (IOException ex) {
             throw new DarumaException(ex);
         }
@@ -589,13 +632,29 @@ public class Daruma {
      * @throws DarumaException
      */
     public void textExpand(String str) throws DarumaException {
+
         try {
             outputStream.write(new String(TEXT_EXPAND).getBytes());
-            outputStream.write(str.getBytes());
+            text(str);
             outputStream.write(new String(TEXT_NORMAL).getBytes());
         } catch (IOException ex) {
             throw new DarumaException(ex);
         }
+    }
+
+    /**
+     * Escreve linha de texto condensado
+     *
+     * @param str
+     * @param align
+     * @throws DarumaException
+     */
+    public void lineCond(String str, char[] align) throws DarumaException {
+        newLine();
+        startCond();
+        align(align);
+        text(str);
+        endCond();
     }
 
     /**
@@ -605,6 +664,7 @@ public class Daruma {
      * @throws DarumaException
      */
     public void bold(String str) throws DarumaException {
+
         try {
             outputStream.write(new String(START_BOLD).getBytes());
             outputStream.write(str.getBytes());
@@ -621,6 +681,7 @@ public class Daruma {
      * @throws DarumaException
      */
     public void italic(String str) throws DarumaException {
+
         try {
             outputStream.write(new String(START_ITALIC).getBytes());
             outputStream.write(str.getBytes());

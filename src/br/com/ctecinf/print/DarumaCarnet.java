@@ -17,11 +17,10 @@
 package br.com.ctecinf.print;
 
 import br.com.ctecinf.Utils;
+import br.com.ctecinf.json.JSONArray;
 import br.com.ctecinf.json.JSONObject;
-import static br.com.ctecinf.print.Daruma.ALIGN_CENTER;
 import br.com.ctecinf.text.DateFormatter;
 import br.com.ctecinf.text.NumberFormatter;
-import java.util.List;
 
 /**
  *
@@ -31,27 +30,26 @@ import java.util.List;
  * @see http://ctecinf.com.br/
  */
 public class DarumaCarnet {
-    
+
     /**
      * Imprimi um Carnet crediario
      *
-     * @param json
-     * @throws java.io.IOException
+     * @param crediario {<br>
+     * "cliente": "",<br>
+     * "data_venda": "",<br>
+     * "valor_total": "",<br>
+     * "parcelas": [<br>
+     * {"id": "", "numero_parcela": "", "valor": "",
+     * "data_vencimento": "", "data_pagamento": ""}, ...<br>
+     * ]<br> }
+     * @throws br.com.ctecinf.print.DarumaException
      */
-    public static void print(JSONObject json) throws Exception {
+    public static void print(JSONObject crediario) throws DarumaException {
 
-        if (crediario == null) {
-            throw new Exception("Crediário nulo.");
-        }
-
-        if (crediario.getCliente() == null) {
-            throw new Exception("Crediário não está vinculado a um cliente.");
-        }
-
-        List<Parcela> parcelas = crediario.listOf(Parcela.class);
+        JSONArray parcelas = crediario.getJSONArrayValue("parcelas");
 
         if (parcelas.isEmpty()) {
-            throw new Exception("Lista de parcelas vazia.");
+            throw new DarumaException("Lista de parcelas vazia.");
         }
 
         Daruma p = new Daruma();
@@ -64,22 +62,51 @@ public class DarumaCarnet {
         p.newLine();
         p.newLine();
 
-        p.leftLine("Cliente: " + crediario.getCliente());
-        p.leftLine("Data da compra: " + DateFormatter.format().format(crediario.getDataVenda()));
-        p.leftLine("Valor total: R$ " + bold(NumberFormatter.format(2).format(crediario.getValorTotal())));
-        p.leftLine("Numero de Parcelas: " + parcelas.size());
+        p.newLine();
+        p.startCond();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Cliente: " + crediario.getStringValue("cliente"));
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Data da compra: " + DateFormatter.format().format(crediario.getDateValue("data_venda")));
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Valor total: R$ ");
+        p.bold(NumberFormatter.format(2).format(crediario.getNumberValue("valor_total")));
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Numero de Parcelas: " + parcelas.size());
+
         p.dotLine();
 
-        for (Parcela parcela : parcelas) {
+        for (JSONObject parcela : parcelas) {
 
-            p.leftLine("Parcela: " + parcela.getNumeroParcela());
-            p.leftLine("Valor: " + NumberFormatter.format(2).format(parcela.getValor()));
-            p.leftLine("Data Venc.: " + DateFormatter.format().format(parcela.getDataVencimento()));
-            p.leftLine("Data Pgto.: " + (parcela.getDataPagamento() != null ? DateFormatter.format().format(parcela.getDataPagamento()) : "    /    /"));
+            p.newLine();
+            p.align(Daruma.ALIGN_LEFT);
+            p.text("Parcela: " + parcela.getStringValue("numero_parcela"));
 
-            p.align(ALIGN_CENTER);
-            p.ean13Bar(Utils.leftPad2(parcela.getId(), 12, '0'), 80, false);
-            p.centerLine(Utils.leftPad2(parcela.getId(), 12, '0'));
+            p.newLine();
+            p.align(Daruma.ALIGN_LEFT);
+            p.text("Valor: " + NumberFormatter.format(2).format(parcela.getNumberValue("valor")));
+
+            p.newLine();
+            p.align(Daruma.ALIGN_LEFT);
+            p.text("Data Venc.: " + DateFormatter.format().format(parcela.getDateValue("data_vencimento")));
+
+            p.newLine();
+            p.align(Daruma.ALIGN_LEFT);
+            p.text("Data Pgto.: " + (parcela.getDateValue("data_pagamento") != null ? DateFormatter.format().format(parcela.getDateValue("data_pagamento")) : "    /    /"));
+
+            p.align(Daruma.ALIGN_CENTER);
+            p.ean13Bar(Utils.leftPad2(parcela.getStringValue("id"), 12, '0'), 80, false);
+
+            p.newLine();
+            p.align(Daruma.ALIGN_CENTER);
+            p.text(Utils.leftPad2(parcela.getStringValue("id"), 12, '0'));
+
             p.dotLine();
         }
 

@@ -17,6 +17,7 @@
 package br.com.ctecinf.print;
 
 import br.com.ctecinf.Utils;
+import br.com.ctecinf.json.JSONObject;
 import br.com.ctecinf.text.DateFormatter;
 
 /**
@@ -31,18 +32,40 @@ public class DarumaReceita {
     /**
      * Imprimi uma Receita do cliente
      *
-     * @param receita
+     * @param receita{<br>
+     * "cliente": {<br>
+     * "nome": "",<br>
+     * "endereco": "",<br>
+     * "fone": "",<br>
+     * "celular": ""<br>
+     * },<br>
+     * "lente": "",<br>
+     * "armacao": "",<br>
+     * "longe": {<br>
+     * "dir_esf": "",<br>
+     * "dir_cil": "",<br>
+     * "dir_eixo": "",<br>
+     * "esq_esf": "",<br>
+     * "esq_cil": "",<br>
+     * "esq_eixo": ""<br>
+     * },<br>
+     * "perto": {<br>
+     * "dir_esf": "",<br>
+     * "dir_cil": "",<br>
+     * "dir_eixo": "",<br>
+     * "esq_esf": "",<br>
+     * "esq_cil": "",<br>
+     * "esq_eixo": ""<br>
+     * },<br>
+     * "adicao": "",<br>
+     * "dnp": "",<br>
+     * "altura": "",<br>
+     * "data_venda": "",<br>
+     * "medico": "",<br>
+     * "vendedor": ""<br> }
      * @throws java.lang.Exception
      */
-    public static void print(Receita receita) throws Exception {
-
-        if (receita == null) {
-            throw new Exception("Receita nula.");
-        }
-
-        if (receita.getCliente() == null) {
-            throw new Exception("Receita não está vinculada a um cliente.");
-        }
+    public static void print(JSONObject receita) throws Exception {
 
         Daruma p = new Daruma();
 
@@ -53,26 +76,73 @@ public class DarumaReceita {
         p.bold("COPIA RECEITA");
         p.newLine();
         p.newLine();
+        p.startCond();
 
-        p.leftLine("Cliente: " + receita.getCliente().getNome());
-        p.leftLine("Endereco: " + receita.getCliente().getEndereco());
-        p.leftLine("Fone: " + receita.getCliente().getFone() + " Celular: " + receita.getCliente().getCelular());
-        p.dotLine();
-        p.leftLine("Lente: <b>" + receita.getLente() + "</b>");
-        p.leftLine("Armacao: " + receita.getArmacao());
-        p.dotLine();
-        p.centerLine("LONGE");
-        p.leftLine("          Dir.: " + Utils.leftPad2(receita.getLongeDireitoEsferico(), 6, ' ') + "   " + Utils.leftPad2(receita.getLongeDireitoCilindrico(), 6, ' ') + " X " + receita.getLongeDireitoEixo());
-        p.leftLine("          Esq.: " + Utils.leftPad2(receita.getLongeEsquerdoEsferico(), 6, ' ') + "   " + Utils.leftPad2(receita.getLongeEsquerdoCilindrico(), 6, ' ') + " X " + receita.getLongeEsquerdoEixo());
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Cliente: " + receita.getJSONObjectValue("cliente").getStringValue("nome"));
 
-        p.centerLine("PERTO");
-        p.leftLine("          Dir.: " + Utils.leftPad2(receita.getPertoDireitoEsferico(), 6, ' ') + "   " + Utils.leftPad2(receita.getPertoDireitoCilindrico(), 6, ' ') + " X " + receita.getPertoDireitoEixo());
-        p.leftLine("          Esq.: " + Utils.leftPad2(receita.getPertoEsquerdoEsferico(), 6, ' ') + "   " + Utils.leftPad2(receita.getPertoEsquerdoCilindrico(), 6, ' ') + " X " + receita.getPertoEsquerdoEixo());
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Endereco: " + receita.getJSONObjectValue("cliente").getStringValue("endereco"));
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Fone: " + receita.getJSONObjectValue("cliente").getStringValue("fone") + " Celular: " + receita.getJSONObjectValue("cliente").getStringValue("celular"));
+
         p.dotLine();
-        p.leftLine("Adicao: <b>" + receita.getAdicao() + "</b>    DNP: <b>" + receita.getDnp() + "</b>   Altura: <b>" + receita.getAltura() + "</b>");
-        p.leftLine("Data: " + DateFormatter.format().format(receita.getDataEncomenda()));
-        p.leftLine("Medico: " + receita.getMedico());
-        p.leftLine("Vendedor: " + receita.getVendedor());
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Lente: <b>" + receita.getStringValue("lente") + "</b>");
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Armacao: " + receita.getStringValue("armacao"));
+
+        p.dotLine();
+
+        p.newLine();
+        p.align(Daruma.ALIGN_CENTER);
+        p.text("LONGE");
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("          Dir.: " + Utils.leftPad2(receita.getJSONObjectValue("longe").getStringValue("dir_esf"), 6, ' ') + "   " + Utils.leftPad2(receita.getJSONObjectValue("longe").getStringValue("dir_cil"), 6, ' ') + " X " + receita.getJSONObjectValue("longe").getStringValue("dir_eixo"));
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("          Esq.: " + Utils.leftPad2(receita.getJSONObjectValue("longe").getStringValue("esq_esf"), 6, ' ') + "   " + Utils.leftPad2(receita.getJSONObjectValue("longe").getStringValue("esq_cil"), 6, ' ') + " X " + receita.getJSONObjectValue("longe").getStringValue("esq_eixo"));
+
+        p.newLine();
+        p.align(Daruma.ALIGN_CENTER);
+        p.text("PERTO");
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("          Dir.: " + Utils.leftPad2(receita.getJSONObjectValue("perto").getStringValue("dir_esf"), 6, ' ') + "   " + Utils.leftPad2(receita.getJSONObjectValue("perto").getStringValue("dir_cil"), 6, ' ') + " X " + receita.getJSONObjectValue("perto").getStringValue("dir_eixo"));
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("          Esq.: " + Utils.leftPad2(receita.getJSONObjectValue("perto").getStringValue("esq_esf"), 6, ' ') + "   " + Utils.leftPad2(receita.getJSONObjectValue("perto").getStringValue("esq_cil"), 6, ' ') + " X " + receita.getJSONObjectValue("perto").getStringValue("esq_eixo"));
+
+        p.dotLine();
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Adicao: <b>" + receita.getStringValue("adicao") + "</b>    DNP: <b>" + receita.getStringValue("dnp") + "</b>   Altura: <b>" + receita.getStringValue("altura") + "</b>");
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Data: " + DateFormatter.format().format(receita.getDateValue("data_venda")));
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Medico: " + receita.getStringValue("medico"));
+
+        p.newLine();
+        p.align(Daruma.ALIGN_LEFT);
+        p.text("Vendedor: " + receita.getStringValue("vendedor"));
 
         p.breakLines(5);
     }

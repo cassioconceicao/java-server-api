@@ -17,6 +17,7 @@
 package br.com.ctecinf.print;
 
 import br.com.ctecinf.Utils;
+import br.com.ctecinf.UtilsException;
 import br.com.ctecinf.text.MaskFormatter;
 import br.com.ctecinf.text.NumberFormatter;
 import br.com.ctecinf.text.TimestampFormatter;
@@ -31,7 +32,7 @@ import br.inf.portalfiscal.nfe.v400.autorizacao.TNfeProc;
  * @see http://ctecinf.com.br/
  */
 public class DarumaDanfe {
-    
+
     /**
      * Imprimi uma DANFE NFC-e V310
      *
@@ -69,7 +70,13 @@ public class DarumaDanfe {
             params.append("cIdToken=000001");
             params.append(cscToken);
 
-            String url = "https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?" + params.toString().replace(cscToken, "") + "&cHashQRCode=" + Utils.sha1(params.toString()).toLowerCase();
+            String url = null;
+
+            try {
+                url = "https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?" + params.toString().replace(cscToken, "") + "&cHashQRCode=" + Utils.sha1(params.toString()).toLowerCase();
+            } catch (UtilsException ex) {
+                throw new DarumaException(ex);
+            }
 
             br.inf.portalfiscal.nfe.v310.autorizacao.TNFe.InfNFeSupl infNFeSupl = new br.inf.portalfiscal.nfe.v310.autorizacao.TNFe.InfNFeSupl();
             infNFeSupl.setQrCode(url);
@@ -226,7 +233,12 @@ public class DarumaDanfe {
 
         p.newLine();
         p.align(Daruma.ALIGN_CENTER);
-        p.bold("NFC-e " + Utils.leftPad2(nfeProc.getNFe().getInfNFe().getIde().getNNF(), 9, '0') + " Serie " + Utils.leftPad2(nfeProc.getNFe().getInfNFe().getIde().getSerie(), 3, '0') + " " + TimestampFormatter.format().format(Utils.dateNFe2Date(nfeProc.getNFe().getInfNFe().getIde().getDhEmi()).getTime()));
+
+        try {
+            p.bold("NFC-e " + Utils.leftPad2(nfeProc.getNFe().getInfNFe().getIde().getNNF(), 9, '0') + " Serie " + Utils.leftPad2(nfeProc.getNFe().getInfNFe().getIde().getSerie(), 3, '0') + " " + TimestampFormatter.format().format(Utils.dateNFe2Date(nfeProc.getNFe().getInfNFe().getIde().getDhEmi()).getTime()));
+        } catch (UtilsException ex) {
+            throw new DarumaException(ex);
+        }
 
         if (nfeProc.getProtNFe().getInfProt().getNProt() != null && nfeProc.getProtNFe().getInfProt().getDhRecbto() != null && nfeProc.getNFe().getInfNFeSupl().getQrCode() != null) {
 
@@ -238,7 +250,12 @@ public class DarumaDanfe {
             p.newLine();
             p.align(Daruma.ALIGN_CENTER);
             p.bold("Data de autorizacao ");
-            p.text(TimestampFormatter.format().format(Utils.dateNFe2Date(nfeProc.getProtNFe().getInfProt().getDhRecbto()).getTime()));
+
+            try {
+                p.text(TimestampFormatter.format().format(Utils.dateNFe2Date(nfeProc.getProtNFe().getInfProt().getDhRecbto()).getTime()));
+            } catch (UtilsException ex) {
+                throw new DarumaException(ex);
+            }
 
             p.newLine();
 
@@ -457,7 +474,12 @@ public class DarumaDanfe {
 
         p.newLine();
         p.align(Daruma.ALIGN_CENTER);
-        p.bold("NFC-e " + Utils.leftPad2(nfeProc.getNFe().getInfNFe().getIde().getNNF(), 9, '0') + " Serie " + Utils.leftPad2(nfeProc.getNFe().getInfNFe().getIde().getSerie(), 3, '0') + " " + TimestampFormatter.format().format(Utils.dateNFe2Date(nfeProc.getNFe().getInfNFe().getIde().getDhEmi()).getTime()));
+
+        try {
+            p.bold("NFC-e " + Utils.leftPad2(nfeProc.getNFe().getInfNFe().getIde().getNNF(), 9, '0') + " Serie " + Utils.leftPad2(nfeProc.getNFe().getInfNFe().getIde().getSerie(), 3, '0') + " " + TimestampFormatter.format().format(Utils.dateNFe2Date(nfeProc.getNFe().getInfNFe().getIde().getDhEmi()).getTime()));
+        } catch (UtilsException ex) {
+            throw new DarumaException(ex);
+        }
 
         if (nfeProc.getProtNFe().getInfProt().getNProt() != null && nfeProc.getProtNFe().getInfProt().getDhRecbto() != null && nfeProc.getNFe().getInfNFeSupl().getQrCode() != null) {
 
@@ -469,7 +491,12 @@ public class DarumaDanfe {
             p.newLine();
             p.align(Daruma.ALIGN_CENTER);
             p.bold("Data de autorizacao ");
-            p.text(TimestampFormatter.format().format(Utils.dateNFe2Date(nfeProc.getProtNFe().getInfProt().getDhRecbto()).getTime()));
+
+            try {
+                p.text(TimestampFormatter.format().format(Utils.dateNFe2Date(nfeProc.getProtNFe().getInfProt().getDhRecbto()).getTime()));
+            } catch (UtilsException ex) {
+                throw new DarumaException(ex);
+            }
 
             p.newLine();
 
@@ -492,7 +519,7 @@ public class DarumaDanfe {
 
             p.newLine();
             p.align(Daruma.ALIGN_CENTER);
-            p.bold(Empresa.getSlogan());
+            //p.bold(Empresa.getSlogan());
 
             p.breakLines(7);
         }

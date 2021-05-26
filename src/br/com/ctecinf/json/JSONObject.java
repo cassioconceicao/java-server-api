@@ -16,6 +16,8 @@
  */
 package br.com.ctecinf.json;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -95,6 +97,30 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     }
 
     /**
+     * Recupera o valor <i>Date</i> do campo
+     *
+     * @param key Nome do campo
+     * @return String
+     */
+    public java.sql.Date getDateValue(String key) {
+        return this.getValue(key) == null ? null : java.sql.Date.valueOf(this.getValue(key).toString());
+    }
+
+    /**
+     * Recupera o valor <i>Number</i> do campo
+     *
+     * @param key Nome do campo
+     * @return String
+     */
+    public Number getNumberValue(String key) {
+        try {
+            return this.getValue(key) == null ? null : NumberFormat.getInstance().parse(this.getValue(key).toString());
+        } catch (ParseException ex) {
+            return null;
+        }
+    }
+
+    /**
      * Recupera o valor <i>JSON</i> do campo
      *
      * @param key Nome do campo
@@ -126,7 +152,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             String key = keys.get(i);
             Object value = this.get(key);
 
-            if (value!=null && (value.getClass().isAssignableFrom(JSONObject.class) || value.getClass().isAssignableFrom(JSONArray.class))) {
+            if (value != null && (value.getClass().isAssignableFrom(JSONObject.class) || value.getClass().isAssignableFrom(JSONArray.class))) {
                 str.append("\"").append(key).append("\": ").append(value);
             } else {
                 str.append("\"").append(key).append("\": \"").append(value).append("\"");
